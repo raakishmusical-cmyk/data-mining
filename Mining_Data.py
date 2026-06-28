@@ -3,55 +3,16 @@ import os
 import re
 import time
 import csv
+import phonenumbers
 from playwright.async_api import async_playwright
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 # ---------------- CONFIG ----------------
 # FILE_NAME = r"C:\Users\trupt\OneDrive\Desktop\Pune_Leads.csv"
-FILE_NAME = "Output/Pune_Leads.csv"
+FILE_NAME = "Output/Mumbai City_Leads.csv"
+# FILE_NAME = "Output/Erode_Leads.csv"
 
-# All 36 districts of Maharashtra; LOCATIONS generated dynamically
-# DISTRICTS = [
-#     "Ahmednagar",
-#     "Akola",
-#     "Amravati",
-#     "Aurangabad",
-#     "Beed",
-#     "Bhandara",
-#     "Buldhana",
-#     "Chandrapur",
-#     "Dhule",
-#     "Gadchiroli",
-#     "Gondia",
-#     "Hingoli",
-#     "Jalgaon",
-#     "Jalna",
-#     "Kolhapur",
-#     "Latur",
-#     "Mumbai City",
-#     "Mumbai Suburban",
-#     "Nagpur",
-#     "Nanded",
-#     "Nandurbar",
-#     "Nashik",
-#     "Osmanabad",
-#     "Palghar",
-#     "Parbhani",
-#     "Pune",
-#     "Raigad",
-#     "Ratnagiri",
-#     "Sangli",
-#     "Satara",
-#     "Sindhudurg",
-#     "Solapur",
-#     "Thane",
-#     "Wardha",
-#     "Washim",
-#     "Yavatmal",
-# ]
-
-# LOCATIONS = [f"{d}, Maharashtra, India" for d in DISTRICTS]
-LOCATIONS = ["pune, Maharashtra, India"]
+LOCATIONS = ["Mumbai City district,Maharashtra, India"]
 
 KEYWORDS = [
     "Sports Shop",
@@ -72,13 +33,13 @@ KEYWORDS = [
 
 # ---------------- PERFORMANCE SETTINGS ----------------
 HEADLESS = True
-MAX_RESULTS_PER_SEARCH = 25
-SCRAPE_WEBSITES = False
+SCRAPE_WEBSITES = True
 SEARCH_TIMEOUT = 20000
 WEBSITE_TIMEOUT = 10000
 INITIAL_WAIT = 1.5
 SCROLL_WAIT = 1.5
 CLICK_WAIT = 1.5
+DEFAULT_REGION = "IN"
 
 HEADERS = [
     "Organization Name",
@@ -115,12 +76,13 @@ seen_keys = set()
 def clean_text(x):
     if not x:
         return "N/A"
-    # Remove newlines, tabs, and carriage returns globally
-    x = str(x).replace("\r", " ").replace("\n", " ").replace("\t", " ")
-    # Strip any double quotes or commas to prevent CSV breakage entirely
-    x = x.replace('"', "").replace(",", " ")
+    x = str(x)
+    x = re.sub(r"[\uE000-\uF8FF]", " ", x)  # private-use icons
+    x = re.sub(r"[\u200B-\u200F\uFEFF]", "", x)  # zero-width chars
+    # x = re.sub(r"\b[A-Za-z0-9]{2,4}\+[A-Za-z0-9]{2,4}\b", " ", x)
     x = re.sub(r"\s+", " ", x)
-    return x.encode("ascii", "ignore").decode().strip()
+    x = x.replace('"', "").replace(",", " ")
+    return x.strip()
 
 
 def normalize(x):
@@ -129,6 +91,52 @@ def normalize(x):
 
 def clean_phone(x):
     return re.sub(r"\D", "", x or "")
+
+
+def split_phone_and_mobile(raw_number, default_region=DEFAULT_REGION):
+    if not raw_number or str(raw_number).strip().lower() in {"n/a", "na"}:
+        return "N/A", "N/A"
+
+    cleaned = str(raw_number).strip()
+    cleaned = (
+        cleaned.replace("Phone:", "")
+        .replace("Mobile:", "")
+        .replace("Tel:", "")
+        .replace("Call:", "")
+    )
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    digits = re.sub(r"\D", "", cleaned)
+    if not digits:
+        return "N/A", "N/A"
+
+    if digits.startswith("91") and len(digits) == 12:
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+
+    if len(digits) == 10:
+        if digits[0] in "6789":
+            return "N/A", f"+91{digits}"
+        return digits, "N/A"
+
+    try:
+        parsed = phonenumbers.parse(cleaned, default_region)
+        if phonenumbers.is_valid_number(parsed):
+            if phonenumbers.number_type(parsed) == phonenumbers.PhoneNumberType.MOBILE:
+                formatted = phonenumbers.format_number(
+                    parsed, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                )
+                return "N/A", formatted
+
+            formatted = phonenumbers.format_number(
+                parsed, phonenumbers.PhoneNumberFormat.NATIONAL
+            )
+            return formatted, "N/A"
+    except phonenumbers.NumberParseException:
+        pass
+
+    return "N/A", "N/A"
 
 
 def clean_domain(url):
@@ -152,13 +160,10 @@ def generate_unique_key(name, phone, website, city):
 
 # ---------------- FIXED ADDRESS SPLITTER ----------------
 def split_address(addr, default_city):
-    # Use the provided default_city (district name) when available
-    try:
-        city = default_city.split(",")[0].strip() if default_city else "Pune"
-    except:
-        city = "Pune"
-    state = "Maharashtra"
-    country = "India"
+    parts = [p.strip() for p in (default_city or "").split(",")]
+    city = parts[0] if parts else "Pune"
+    state = parts[1] if len(parts) > 1 else "Maharashtra"
+    country = parts[2] if len(parts) > 2 else "India"
     zipcode = "N/A"
 
     if not addr or addr == "N/A" or len(addr.strip()) < 5:
@@ -266,6 +271,18 @@ async def scrape_site(page, url):
     return result
 
 
+# ---------------- TRANSLATE ----------------
+async def translate_to_english(page, text):
+    url = (
+        "https://translate.google.com/?sl=auto&tl=en&text="
+        + quote(text)
+        + "&op=translate"
+    )
+    await page.goto(url, timeout=15000, wait_until="domcontentloaded")
+    await page.wait_for_selector("span[jsname='W297wb']", timeout=15000)
+    return await page.locator("span[jsname='W297wb']").text_content()
+
+
 # ---------------- MAIN ----------------
 async def run():
     init_csv()
@@ -274,6 +291,7 @@ async def run():
         browser = await p.chromium.launch(headless=HEADLESS)
         page = await browser.new_page()
         website_page = await browser.new_page() if SCRAPE_WEBSITES else None
+        translator_page = await browser.new_page()
 
         for loc in LOCATIONS:
             for kw in KEYWORDS:
@@ -284,7 +302,9 @@ async def run():
                         timeout=SEARCH_TIMEOUT,
                         wait_until="domcontentloaded",
                     )
-                    await page.wait_for_selector('div[role="feed"]', timeout=SEARCH_TIMEOUT)
+                    await page.wait_for_selector(
+                        'div[role="feed"]', timeout=SEARCH_TIMEOUT
+                    )
                     await asyncio.sleep(INITIAL_WAIT)
                 except:
                     continue
@@ -320,13 +340,23 @@ async def run():
                         await scroll.evaluate("el => el.scrollTop += 5500")
                         await asyncio.sleep(3)
 
-                total = min(await page.locator("a.hfpxzc").count(), MAX_RESULTS_PER_SEARCH)
+                total = await page.locator("a.hfpxzc").count()
                 print(f"Total Found (capped): {total}")
 
                 for i in range(total):
                     try:
                         item = page.locator("a.hfpxzc").nth(i)
-                        name = clean_text(await item.get_attribute("aria-label"))
+                        raw_name = await item.get_attribute("aria-label")
+                        name = clean_text(raw_name or "")
+
+                        if name:
+                            try:
+                                name = clean_text(
+                                    await translate_to_english(translator_page, name)
+                                )
+                            except Exception:
+                                pass
+
                         await item.click()
 
                         try:
@@ -339,20 +369,13 @@ async def run():
 
                         phone = "N/A"
                         mobile = "N/A"
-                        number = ""
-                        digits = ""
+                        raw_phone = ""
 
                         if await page.locator('button[aria-label^="Phone"]').count():
                             raw_phone = await page.locator(
                                 'button[aria-label^="Phone"]'
                             ).first.get_attribute("aria-label")
-                            number = raw_phone.replace("Phone: ", "").strip()
-                            digits = re.sub(r"\D", "", number)
-                        # Indian mobile numbers start with 6,7,8,9
-                        if len(digits) >= 10 and digits[-10] in "6789":
-                            mobile = number
-                        else:
-                            phone = number
+                            phone, mobile = split_phone_and_mobile(raw_phone)
 
                         print("Phone:", phone)
                         print("Mobile:", mobile)
@@ -364,9 +387,21 @@ async def run():
                             ).first.get_attribute("href")
 
                         if await page.locator('button[data-item-id="address"]').count():
-                            address = await page.locator(
+                            raw_address = await page.locator(
                                 'button[data-item-id="address"]'
-                            ).first.inner_text()
+                            ).first.text_content()
+                            raw_address = clean_text(raw_address)
+                            print("ADDRESS:", repr(raw_address))
+                            if raw_address:
+                                try:
+                                    address = await translate_to_english(
+                                        translator_page, raw_address
+                                    )
+                                    address = address or raw_address
+                                except Exception:
+                                    address = raw_address
+                            else:
+                                address = "N/A"
 
                         street, city, state, zip_code, country = split_address(
                             address, loc
@@ -386,7 +421,12 @@ async def run():
                             "YouTube": "N/A",
                         }
 
-                        if website and website.startswith("http") and SCRAPE_WEBSITES and website_page:
+                        if (
+                            website
+                            and website.startswith("http")
+                            and SCRAPE_WEBSITES
+                            and website_page
+                        ):
                             extra = await scrape_site(website_page, website)
 
                         row = [
