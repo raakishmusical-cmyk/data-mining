@@ -10,7 +10,6 @@ from urllib.parse import urlparse, quote
 # ---------------- CONFIG ----------------
 # FILE_NAME = r"C:\Users\trupt\OneDrive\Desktop\Pune_Leads.csv"
 FILE_NAME = "Output/Mumbai City_Leads.csv"
-# FILE_NAME = "Output/Erode_Leads.csv"
 
 LOCATIONS = ["Mumbai City district,Maharashtra, India"]
 
@@ -93,50 +92,53 @@ def clean_phone(x):
     return re.sub(r"\D", "", x or "")
 
 
-def split_phone_and_mobile(raw_number, default_region=DEFAULT_REGION):
-    if not raw_number or str(raw_number).strip().lower() in {"n/a", "na"}:
+def split_phone_and_mobile(raw_value):
+    if not raw_value or str(raw_value).strip().lower() in {"n/a", "na"}:
         return "N/A", "N/A"
 
-    cleaned = str(raw_number).strip()
-    cleaned = (
-        cleaned.replace("Phone:", "")
+    phone = "N/A"
+    mobile = "N/A"
+
+    text = (
+        str(raw_value)
+        .replace("Phone:", "")
         .replace("Mobile:", "")
         .replace("Tel:", "")
-        .replace("Call:", "")
+        .replace("Fax:", "")
     )
-    cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
-    digits = re.sub(r"\D", "", cleaned)
-    if not digits:
-        return "N/A", "N/A"
+    parts = [p.strip() for p in re.split(r"[,;/\\n|]+", text) if p.strip()]
 
-    if digits.startswith("91") and len(digits) == 12:
-        digits = digits[2:]
-    elif len(digits) == 11 and digits.startswith("0"):
-        digits = digits[1:]
+    for part in parts:
+        try:
+            parsed = phonenumbers.parse(part, "IN")
 
-    if len(digits) == 10:
-        if digits[0] in "6789":
-            return "N/A", f"+91{digits}"
-        return digits, "N/A"
+            if not phonenumbers.is_valid_number(parsed):
+                continue
 
-    try:
-        parsed = phonenumbers.parse(cleaned, default_region)
-        if phonenumbers.is_valid_number(parsed):
-            if phonenumbers.number_type(parsed) == phonenumbers.PhoneNumberType.MOBILE:
-                formatted = phonenumbers.format_number(
-                    parsed, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-                )
-                return "N/A", formatted
-
+            number_type = phonenumbers.number_type(parsed)
             formatted = phonenumbers.format_number(
                 parsed, phonenumbers.PhoneNumberFormat.NATIONAL
             )
-            return formatted, "N/A"
-    except phonenumbers.NumberParseException:
-        pass
 
-    return "N/A", "N/A"
+            if number_type == phonenumbers.PhoneNumberType.MOBILE:
+                mobile = formatted
+            elif number_type == phonenumbers.PhoneNumberType.FIXED_LINE_OR_MOBILE:
+                if re.search(r"\bmobile\b", part, flags=re.IGNORECASE) or re.search(
+                    r"^(?:\+91)?[6-9]\d{9}$", part
+                ):
+                    mobile = formatted
+                else:
+                    phone = formatted
+            elif number_type == phonenumbers.PhoneNumberType.FIXED_LINE:
+                phone = formatted
+            else:
+                phone = formatted
+
+        except Exception:
+            pass
+
+    return phone, mobile
 
 
 def clean_domain(url):
