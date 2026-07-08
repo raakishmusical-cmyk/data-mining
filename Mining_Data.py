@@ -9,9 +9,9 @@ from urllib.parse import urlparse, quote
 
 # ---------------- CONFIG ----------------
 # FILE_NAME = r"C:\Users\trupt\OneDrive\Desktop\Pune_Leads.csv"
-FILE_NAME = "Output/Mumbai City_Leads.csv"
+FILE_NAME = "Output/Ahmednagar_Leads.csv"
 
-LOCATIONS = ["Mumbai City district,Maharashtra, India"]
+LOCATIONS = ["Ahmednagar,Maharashtra, India"]
 
 KEYWORDS = [
     "Sports Shop",
