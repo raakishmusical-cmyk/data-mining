@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Lead Harvester & Data Mining Suite</title>
+    <meta name="description"
+        content="High performance asynchronous Google Maps lead mining and contact verification dashboard.">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">▲</div>
+                <h2>22yards RK Mining <span>agent</span></h2>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" id="btn-tab-mining" data-tab="mining">
+                    <span class="icon">🧭</span> Mining Dashboard
+                </button>
+                <button class="nav-item" id="btn-tab-validation" data-tab="validation">
+                    <span class="icon">🛡️</span> Validation Board
+                </button>
+                <button class="nav-item" id="btn-tab-history" data-tab="history">
+                    <span class="icon">📁</span> Recent Files
+                </button>
+                <button class="nav-item" id="btn-tab-settings" data-tab="settings">
+                    <span class="icon">⚙️</span> Settings
+                </button>
+                <button class="nav-item" id="btn-tab-logs" data-tab="logs">
+                    <span class="icon">📜</span> System Logs
+                </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content"
+            style="flex-grow:1; display:flex; flex-direction:column; padding:30px; overflow-y:auto;">
+            <!-- Header bar -->
+            <header class="header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; background:rgba(16, 20, 27, 0.4); border:1px solid var(--border-color); padding: 16px 24px; border-radius: var(--radius-md); backdrop-filter: blur(15px);">
+                <div class="header-left" style="display:flex; align-items:center; gap:14px;">
+                    <div class="header-icon"
+                        style="font-size:24px; width:40px; height:40px; background:linear-gradient(135deg, var(--primary), #00b8d9); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 0 10px rgba(32,101,209,0.3);">
+                        🧭</div>
+                    <div>
+                        <h1 id="page-title" style="font-size:18px; font-weight:700; margin:0; letter-spacing:-0.4px;">
+                            Mining Dashboard</h1>
+                        <p class="subtitle" id="page-subtitle"
+                            style="font-size:12px; color:var(--text-secondary); margin:2px 0 0 0;">Configure parameters
+                            and launch RK Business Data Harvester.</p>
+                    </div>
+                </div>
+                <div class="header-right" style="display:flex; align-items:center; gap:20px;">
+                    <div class="worker-count-badge"
+                        style="display:flex; flex-direction:column; align-items:flex-end; border:none; background:none; padding:0; margin:0;">
+                        <span
+                            style="font-size:9px; opacity:0.6; text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Active
+                            Workers</span>
+                        <strong id="header-worker-count"
+                            style="font-size:15px; color:#06b6d4; font-weight:700;">30</strong>
+                    </div>
+
+                    <div style="height:20px; width:1px; background:var(--border-color);"></div>
+
+                    <div
+                        style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.02); padding:6px 12px; border:1px solid var(--border-color); border-radius:20px;">
+                        <div class="status-indicator online" id="status-badge"
+                            style="font-size:11px; font-weight:700; display:flex; align-items:center; gap:6px; padding-left:14px;">
+                            Online</div>
+                    </div>
+
+                    <div style="height:20px; width:1px; background:var(--border-color);"></div>
+
+                    <div class="header-clock" id="clock-display"
+                        style="font-family:monospace; font-size:13px; font-weight:600; color:var(--text-secondary); background:rgba(0,0,0,0.25); padding:6px 12px; border-radius:6px; border:1px solid var(--border-color);">
+                        00:00:00</div>
+                </div>
+            </header>
+
+            <!-- Mining Dashboard Tab -->
+            <section class="tab-pane active" id="tab-mining">
+
+                <!-- Top Row: Scraping Parameters (Left) & Target Keywords (Right) -->
+                <div class="top-row-grid"
+                    style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:stretch;">
+
+                    <!-- Left Panel: Scraping Parameters -->
+                    <div class="card param-panel"
+                        style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                        <div>
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom:1px solid var(--border-color); padding-bottom: 12px;">
+                                <h3
+                                    style="margin:0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+                                    ⚡ Scraping Parameters</h3>
+                                <span class="badge"
+                                    style="background:var(--primary-glow); color:var(--primary); font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600; border:1px solid rgba(32, 101, 209, 0.3);">Dynamic
+                                    Configuration</span>
+                            </div>
+                            <form id="mining-form" onsubmit="return false;">
+
+                                <!-- Location Mode Toggle -->
+                                <div class="form-group">
+                                    <label
+                                        style="font-weight: 600; margin-bottom: 8px; display: block; font-size:11px;">District
+                                        Selection Mode</label>
+                                    <div class="toggle-mode-container" id="district-mode-toggle"
+                                        style="display: inline-flex; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 24px; padding: 3px; position:relative; min-width: 220px; height: 36px; align-items: center; cursor: pointer;">
+                                        <div class="toggle-slide-bg" id="toggle-slide-bg"
+                                            style="position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 6px); background:var(--primary); border-radius:20px; z-index:1; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);">
+                                        </div>
+                                        <div class="toggle-option active" data-value="automation"
+                                            style="flex:1; text-align:center; font-size: 12px; font-weight:700; z-index:2; transition: color 0.25s ease; color: white;">
+                                            Automation</div>
+                                        <div class="toggle-option" data-value="manual"
+                                            style="flex:1; text-align:center; font-size: 12px; font-weight:700; z-index:2; transition: color 0.25s ease; color: var(--text-secondary);">
+                                            Manual</div>
+                                    </div>
+                                    <input type="radio" name="district-mode" value="automation" checked
+                                        style="display:none;">
+                                    <input type="radio" name="district-mode" value="manual" style="display:none;">
+                                </div>
+
+                                <!-- State/District Automation Mode Fields -->
+                                <div id="automation-location-fields">
+                                    <!-- Custom Country Dropdown -->
+                                    <div class="form-group">
+                                        <label for="country-select-trigger">Country</label>
+                                        <div class="custom-select-wrapper" id="country-select-wrapper">
+                                            <div class="custom-select-trigger" id="country-select-trigger">
+                                                <span id="country-select-label">USA</span>
+                                                <div class="arrow"></div>
+                                            </div>
+                                            <div class="custom-select-options-container"
+                                                id="country-select-options-container">
+                                                <div class="custom-select-options" id="country-options-list">
+                                                    <div class="custom-option selected" data-value="USA">USA</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <select id="input-country" style="display:none;">
+                                            <option value="USA">USA</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Custom State Dropdown -->
+                                    <div class="form-group">
+                                        <label for="state-select-trigger" id="lbl-state-select">State</label>
+                                        <div class="custom-select-wrapper" id="state-select-wrapper">
+                                            <div class="custom-select-trigger" id="state-select-trigger">
+                                                <span id="state-select-label">Select State</span>
+                                                <div class="arrow"></div>
+                                            </div>
+                                            <div class="custom-select-options-container"
+                                                id="state-select-options-container">
+                                                <div class="custom-select-search-wrapper">
+                                                    <input type="text" class="custom-select-search"
+                                                        placeholder="Search state (e.g. Texas)..."
+                                                        id="state-search-input">
+                                                </div>
+                                                <div class="custom-select-options" id="state-options-list">
+                                                    <!-- Populated dynamically via JS -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <select id="input-state" style="display:none;">
+                                            <option value="">Select State</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Custom District Dropdown -->
+                                    <div class="form-group">
+                                        <label
+                                            style="display: flex; justify-content: space-between; align-items: center;">
+                                            <span id="lbl-district-select-title">Select Cities</span>
+                                            <span id="lbl-districts-selected-count"
+                                                style="font-size: 11px; opacity: 0.8; font-weight: 600;">0
+                                                Selected</span>
+                                        </label>
+                                        <div class="custom-select-wrapper" id="district-select-wrapper">
+                                            <div class="custom-select-trigger" id="district-select-trigger">
+                                                <div class="chips-display" id="district-chips-display">Select Cities
+                                                </div>
+                                                <div class="arrow"></div>
+                                            </div>
+                                            <div class="custom-select-options-container"
+                                                id="district-select-options-container">
+                                                <div class="custom-select-search-wrapper">
+                                                    <input type="text" class="custom-select-search"
+                                                        placeholder="Search city..." id="district-search-input">
+                                                </div>
+                                                <div class="custom-select-options" id="district-options-list">
+                                                    <div
+                                                        style="text-align: center; padding: 20px 0; opacity: 0.6; font-size: 13px;">
+                                                        Please select a State first.</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="district-warning"
+                                            style="display:none; color: var(--danger); font-size:12px; font-weight:600; margin-top:6px;">
+                                            ⚠️ Maximum 10 cities allowed.</div>
+                                        <div class="selected-chips-container" id="selected-districts-chips"
+                                            style="display: none;"></div>
+                                    </div>
+                                </div>
+
+                                <!-- State/District Manual Mode Fields -->
+                                <div id="manual-location-fields" style="display:none;">
+                                    <div class="form-group">
+                                        <label for="input-districts-manual" id="lbl-districts-manual">Enter Locations
+                                            (Comma or New Line
+                                            separated)</label>
+                                        <textarea id="input-districts-manual" class="form-control" rows="4"
+                                            placeholder="Enter target locations, e.g.&#10;Dallas&#10;Houston&#10;Kathmandu&#10;Lalitpur"
+                                            style="font-size: 13px; line-height: 1.5; resize: none;"></textarea>
+                                        <small style="display: block; margin-top: 4px; opacity: 0.7;">Enter district
+                                            names precisely. Maximum 10 districts allowed.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Export and Workers row -->
+                                <div class="form-row" style="margin-top: 20px;">
+                                    <div class="form-group half">
+                                        <label for="format-select-trigger">Export Format</label>
+                                        <div class="custom-select-wrapper" id="format-select-wrapper">
+                                            <div class="custom-select-trigger" id="format-select-trigger">
+                                                <span id="format-select-label">Excel (XLSX)</span>
+                                                <div class="arrow"></div>
+                                            </div>
+                                            <div class="custom-select-options-container"
+                                                id="format-select-options-container">
+                                                <div class="custom-select-options">
+                                                    <div class="custom-option selected" data-value="xlsx">Excel (XLSX)
+                                                    </div>
+                                                    <div class="custom-option" data-value="csv">CSV File</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <select id="input-format" style="display:none;">
+                                            <option value="xlsx" selected>xlsx</option>
+                                            <option value="csv">csv</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group half">
+                                        <label for="workers-select-trigger">Fast Scraping Workers</label>
+                                        <div class="custom-select-wrapper" id="workers-select-wrapper">
+                                            <div class="custom-select-trigger" id="workers-select-trigger">
+                                                <span id="workers-select-label">30 Workers</span>
+                                                <div class="arrow"></div>
+                                            </div>
+                                            <div class="custom-select-options-container"
+                                                id="workers-select-options-container">
+                                                <div class="custom-select-options" id="workers-options-list">
+                                                    <!-- Populated via JS -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="number" id="input-workers" min="1" max="100" value="30"
+                                            style="display:none;">
+                                    </div>
+                                </div>
+
+                                <!-- Translator settings -->
+                                <div class="form-group"
+                                    style="margin-top: 14px; display:flex; flex-direction:column; gap:4px;">
+                                    <label
+                                        style="display:flex; align-items:center; gap:8px; font-size:12px; font-weight:600; cursor:pointer; user-select:none; color:var(--text-primary);">
+                                        <input type="checkbox" id="chk-translate-english" checked
+                                            style="accent-color:var(--primary); width:16px; height:16px; cursor:pointer;">
+                                        <span>Force English Translation</span>
+                                    </label>
+                                    <small
+                                        style="display:block; color:var(--text-secondary); margin-top:2px; font-size:11px;">Translates
+                                        non-English names, addresses, and classifications to English
+                                        dynamically.</small>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="control-actions" style="margin-top: 24px; display: flex; gap: 10px; width: 100%;">
+                            <button class="btn btn-primary" id="btn-start-mining"
+                                style="flex: 1; height:42px; font-weight:700;">▶ Start Mining</button>
+                            <button class="btn btn-secondary" id="btn-pause-mining" disabled
+                                style="flex: 1; height:42px; font-weight:700;">⏸ Pause</button>
+                            <button class="btn btn-success" id="btn-resume-mining" disabled
+                                style="display:none; flex: 1; height:42px; font-weight:700;">🔄 Resume</button>
+                            <button class="btn btn-danger" id="btn-stop-mining" disabled
+                                style="flex: 1; height:42px; font-weight:700;">⏹ Stop</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Target Keywords -->
+                    <div class="card keyword-panel"
+                        style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                        <div>
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom:1px solid var(--border-color); padding-bottom: 12px;">
+                                <div>
+                                    <h3
+                                        style="margin:0; font-size: 15px; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+                                        🎯 Target Keywords</h3>
+                                    <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">(Select
+                                        one, multiple, or all)</div>
+                                </div>
+                                <span class="badge"
+                                    style="background:var(--primary-glow); color:var(--primary); font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600; border:1px solid rgba(32, 101, 209, 0.3);"
+                                    id="lbl-keyword-counter">0 Selected</span>
+                            </div>
+
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:10px;">
+                                <input type="text" id="kw-search" class="form-control" placeholder="Search keywords..."
+                                    style="font-size: 13px; padding: 8px 12px; flex-grow:1; height:34px;">
+                                <div style="display:flex; gap:6px;">
+                                    <button type="button" class="btn btn-xs btn-outline" id="btn-kw-select-all"
+                                        style="padding: 4px 10px; font-size: 11px; height:34px;">Select All</button>
+                                    <button type="button" class="btn btn-xs btn-outline" id="btn-kw-deselect-all"
+                                        style="padding: 4px 10px; font-size: 11px; height:34px;">Deselect All</button>
+                                </div>
+                            </div>
+
+                            <div class="keyword-chips-wrapper" id="keyword-chips-wrapper"
+                                style="display:flex; flex-wrap:wrap; gap:6px; max-height:220px; overflow-y:auto; padding:10px; border:1px solid var(--border-color); border-radius:6px; background:rgba(0,0,0,0.15); margin-bottom:12px;">
+                                <!-- Populated dynamically via JS -->
+                            </div>
+                        </div>
+
+                        <div class="custom-keyword-adder"
+                            style="margin-top:auto; padding-top:12px; border-top:1px dashed var(--border-color);">
+                            <div class="input-append-row" style="display:flex; gap:8px;">
+                                <input type="text" id="input-custom-keyword" class="form-control"
+                                    placeholder="Add custom keyword (e.g. Hospital, Restaurant)..."
+                                    style="font-size:12px; height:34px; flex-grow:1;">
+                                <button type="button" class="btn btn-primary" id="btn-add-custom-kw"
+                                    style="padding:0 14px; height:34px; font-size:12px; background:var(--primary); font-weight:700;">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Harvester Progress Indicators -->
+                <div class="card progress-card" style="margin-top:24px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+                        <h3
+                            style="margin:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+                            📈 Harvester Progress Indicators</h3>
+                        <span class="badge"
+                            style="background:var(--success-bg); color:var(--success); border:1px solid rgba(54,179,126,0.3); font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600;">Realtime
+                            Sync</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
+
+                        <!-- Overall Progress -->
+                        <div class="progress-bar-group">
+                            <div class="progress-bar-label-row"
+                                style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; font-weight:600;">
+                                <span>Overall Queue Progress</span>
+                                <strong id="lbl-overall-progress-count">0% (Completed: 0, Remaining: 0)</strong>
+                            </div>
+                            <div class="progress-bar"
+                                style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-fill animated" id="overall-progress-fill"
+                                    style="width: 0%; height: 100%; background: linear-gradient(90deg, #3b82f6, #06b6d4); transition: width 0.4s ease;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- District Progress -->
+                        <div class="progress-bar-group">
+                            <div class="progress-bar-label-row"
+                                style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; font-weight:600;">
+                                <span>District Sequence Progress</span>
+                                <strong id="lbl-district-progress-count">0% (Completed: 0, Remaining: 0)</strong>
+                            </div>
+                            <div class="progress-bar"
+                                style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-fill animated" id="district-progress-fill"
+                                    style="width: 0%; height: 100%; background: linear-gradient(90deg, #a855f7, #ec4899); transition: width 0.4s ease;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Keyword Progress -->
+                        <div class="progress-bar-group">
+                            <div class="progress-bar-label-row"
+                                style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; font-weight:600;">
+                                <span>Keyword Progress</span>
+                                <strong id="lbl-keyword-progress-count">0% (Completed: 0, Remaining: 0)</strong>
+                            </div>
+                            <div class="progress-bar"
+                                style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-fill animated" id="keyword-progress-fill"
+                                    style="width: 0%; height: 100%; background: linear-gradient(90deg, #eab308, #f97316); transition: width 0.4s ease;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Scroll Progress -->
+                        <div class="progress-bar-group">
+                            <div class="progress-bar-label-row"
+                                style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; font-weight:600;">
+                                <span>Business Scroll Progress</span>
+                                <strong id="lbl-business-progress-count">0% (Completed: 0, Remaining: 0)</strong>
+                            </div>
+                            <div class="progress-bar"
+                                style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; position: relative;">
+                                <div class="progress-fill animated" id="business-progress-fill"
+                                    style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); transition: width 0.4s ease;">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Current Activity Status -->
+                <div class="card activity-card" style="margin-top:24px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+                        <h3
+                            style="margin:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+                            🌀 Current Activity Status</h3>
+                        <span class="badge"
+                            style="background:rgba(255,171,0,0.1); color:var(--warning); font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600;"
+                            id="act-stage">Idle</span>
+                    </div>
+                    <div class="activity-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; font-size: 12px;">
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02);">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                State</small>
+                            <strong id="act-state"
+                                style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">N/A</strong>
+                        </div>
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02);">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                District</small>
+                            <strong id="act-district"
+                                style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">N/A</strong>
+                        </div>
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02);">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                Keyword</small>
+                            <strong id="act-keyword"
+                                style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">N/A</strong>
+                        </div>
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02); grid-column: span 2;">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                Business</small>
+                            <strong id="act-business"
+                                style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">N/A</strong>
+                        </div>
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02); grid-column: span 2;">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                Website</small>
+                            <strong id="act-website"
+                                style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:13px;">N/A</strong>
+                        </div>
+                        <div
+                            style="display:flex; flex-direction:column; background:rgba(255,255,255,0.01); padding:10px; border-radius:6px; border:1px solid rgba(255,255,255,0.02);">
+                            <small
+                                style="opacity:0.6; margin-bottom:4px; text-transform:uppercase; font-size:9px; font-weight:600; letter-spacing:0.5px;">Current
+                                Worker Stage</small>
+                            <strong id="act-stage-text" class="text-warn"
+                                style="font-size:13px; font-weight:700; color:#ffab00;">Idle</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mining Statistics Summary -->
+                <div class="card stats-card-panel" style="margin-top:24px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+                        <h3
+                            style="margin:0; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#ffffff; display:flex; align-items:center; gap:8px;">
+                            📊 Mining Statistics Summary</h3>
+                        <span class="badge"
+                            style="background:var(--primary-glow); color:var(--primary); font-size:10px; padding:2px 8px; border-radius:20px; font-weight:600;">Performance
+                            metrics</span>
+                    </div>
+                    <div class="stats-grid"
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">⏱️
+                                Elapsed Mining Time</span>
+                            <strong id="stat-elapsed-time"
+                                style="font-size:16px; font-weight:700; color:#3b82f6;">00:00:00</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">⏳
+                                Estimated Time (ETA)</span>
+                            <strong id="stat-eta" style="font-size:16px; font-weight:700; color:#ffab00;">N/A</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">⚡
+                                Mining Speed (BPS)</span>
+                            <strong id="stat-bps" style="font-size:16px; font-weight:700; color:#06b6d4;">0.00
+                                leads/s</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">📋
+                                Remaining Queue</span>
+                            <strong id="stat-queue-size" style="font-size:16px; font-weight:700; color:#a855f7;">0
+                                items</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">🔍
+                                Businesses Found</span>
+                            <strong id="stat-found" style="font-size:16px; font-weight:700;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">💾
+                                Businesses Saved</span>
+                            <strong id="stat-saved" style="font-size:16px; font-weight:700; color:#10b981;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">📞
+                                Phone Numbers</span>
+                            <strong id="stat-phones" style="font-size:16px; font-weight:700;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">📧
+                                Emails Extracted</span>
+                            <strong id="stat-emails" style="font-size:16px; font-weight:700;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">🌐
+                                Website Crawled</span>
+                            <strong id="stat-websites" style="font-size:16px; font-weight:700;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">♻️
+                                Duplicates Removed</span>
+                            <strong id="stat-skipped" style="font-size:16px; font-weight:700;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(239,68,68,0.02); border:1px solid rgba(239,68,68,0.1); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:#ff5630; text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">⚠️
+                                Failed Businesses</span>
+                            <strong id="stat-failed-leads"
+                                style="font-size:16px; font-weight:700; color:#ff5630;">0</strong>
+                        </div>
+                        <div class="stat-card"
+                            style="background:rgba(255,255,255,0.01); border:1px solid var(--border-color); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:4px;">
+                            <span class="stat-title"
+                                style="font-size:10px; color:var(--text-secondary); text-transform:uppercase; font-weight:600; display:flex; align-items:center; gap:4px;">🔥
+                                Success Rate</span>
+                            <strong id="stat-success-rate"
+                                style="font-size:16px; font-weight:700; color:#10b981;">100%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Process Terminal -->
+                <div class="card terminal-card"
+                    style="margin-top:24px; padding:0; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--border-color);">
+                    <div class="terminal-header"
+                        style="display:flex; justify-content:space-between; align-items:center; background:#161c24; border-bottom:1px solid var(--border-color); padding: 10px 14px;">
+                        <div class="mac-dots" style="display:flex; gap:6px;">
+                            <span
+                                style="width:10px; height:10px; border-radius:50%; background:#ff5f56; display:inline-block;"></span>
+                            <span
+                                style="width:10px; height:10px; border-radius:50%; background:#ffbd2e; display:inline-block;"></span>
+                            <span
+                                style="width:10px; height:10px; border-radius:50%; background:#27c93f; display:inline-block;"></span>
+                        </div>
+                        <div
+                            style="font-size:11px; font-weight:600; opacity:0.6; font-family:monospace; display:flex; align-items:center; gap:6px;">
+                            💻 harvester-engine-console</div>
+                        <div class="terminal-actions" style="display:flex; gap:12px; align-items:center;">
+                            <label
+                                style="display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer; user-select:none; color:var(--text-secondary);"><input
+                                    type="checkbox" id="chk-auto-scroll" checked style="accent-color:var(--primary);">
+                                Auto-Scroll</label>
+                            <button class="btn btn-xs btn-outline" id="btn-copy-logs"
+                                style="padding: 2px 8px; font-size:11px;">Copy Logs</button>
+                            <button class="btn btn-xs" id="btn-clear-logs"
+                                style="padding: 2px 8px; font-size:11px;">Clear</button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="live-terminal"
+                        style="height: 220px; border-radius:0; border:none; padding: 16px; background:#07090d; overflow-y:auto; font-family: 'Courier New', Courier, monospace;">
+                        <div class="terminal-line system">[SYSTEM] Harvester engine online. Ready to accept request
+                            inputs.</div>
+                    </div>
+                </div>
+
+                <!-- Live Mined Records Section -->
+                <div class="card live-records-panel" style="margin-top: 25px;">
+                    <div class="panel-header"
+                        style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div class="header-left-group" style="display:flex; align-items:center; gap:12px;">
+                            <h3
+                                style="margin:0; font-size:15px; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:8px;">
+                                💎 Live Mined Records</h3>
+                            <span class="counter-badge" id="lbl-live-leads-counter"
+                                style="background:var(--success-bg); color:var(--success); border:1px solid rgba(54,179,126,0.3); font-size:11px; padding:2px 8px; border-radius:20px; font-weight:700;">0
+                                Leads Mined</span>
+                        </div>
+                        <div class="header-actions">
+                            <input type="text" id="live-leads-search" class="form-control"
+                                placeholder="Search live table..."
+                                style="width: 250px; font-size:13px; height:32px; padding: 0 10px;">
+                        </div>
+                    </div>
+                    <div class="table-scroll"
+                        style="max-height: 380px; overflow-y:auto; border: 1px solid var(--border-color); border-radius:6px; margin-top:12px;">
+                        <table class="data-table" id="live-leads-table"
+                            style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
+                            <thead style="background:rgba(255,255,255,0.03); position:sticky; top:0; z-index:5;">
+                                <tr>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Organization
+                                        Name</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Phone</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Email</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Website</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Street</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">City</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">State</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Country</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Industry
+                                    </th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Tags</th>
+                                    <th style="padding: 10px; border-bottom:1px solid var(--border-color);">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Live entries will be appended here -->
+                                <tr class="empty-row-placeholder">
+                                    <td colspan="11"
+                                        style="text-align:center; padding:30px; opacity:0.5; font-style:italic;">No
+                                        records mined in the current session. Run a job to see leads stream here.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Validation Dashboard Tab -->
+            <section class="tab-pane" id="tab-validation">
+                <div class="validation-container">
+                    <div class="card upload-card">
+                        <h3>Verify Lead Quality</h3>
+                        <p>Upload any scraped XLSX or CSV file to run duplicate checks, mark repeats, or fix
+                            classifications.</p>
+
+                        <div class="drop-zone" id="drop-zone">
+                            <span class="drop-icon">📤</span>
+                            <span class="drop-text">Drag & drop files here or click to browse</span>
+                            <input type="file" id="file-uploader" style="display:none;" accept=".csv,.xlsx,.xls">
+                        </div>
+
+                        <!-- Uploaded File Card -->
+                        <div class="uploaded-file-card" id="uploaded-file-card"
+                            style="display: none; justify-content: space-between; align-items: center; padding: 16px; background: var(--bg-element); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 12px; margin-bottom: 16px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <span style="font-size: 28px;">📄</span>
+                                <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+                                    <strong id="card-filename"
+                                        style="font-size: 14px; color: #ffffff;">file_name.xlsx</strong>
+                                    <div
+                                        style="display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary);">
+                                        <span>Size: <span id="card-filesize">0 KB</span></span>
+                                        <span>Rows: <span id="card-rows">0</span></span>
+                                        <span>Type: <span id="card-filetype">Excel</span></span>
+                                    </div>
+                                    <div style="display: flex; gap: 16px; font-size: 12px; margin-top: 2px;">
+                                        <span style="color: var(--success); font-weight: 600;">✓ Uploaded
+                                            Successfully</span>
+                                        <span style="color: var(--text-muted);">Uploaded: <span
+                                                id="card-uploadtime">Just now</span></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" id="btn-remove-file"
+                                style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; border-radius: 4px;">
+                                🗑️ Remove File
+                            </button>
+                        </div>
+
+                        <div class="selected-file-label" id="selected-file-name" style="margin-top: 8px;"></div>
+
+                        <div class="validation-actions">
+                            <button class="btn btn-primary" id="btn-find-duplicates" disabled>Find Duplicates</button>
+                            <button class="btn btn-secondary" id="btn-mark-duplicates" disabled>Mark Duplicates</button>
+                            <button class="btn btn-danger" id="btn-delete-duplicates" disabled>Delete
+                                Duplicates</button>
+                            <button class="btn btn-warning" id="btn-fix-classification" disabled>Fix Industry &
+                                Tag</button>
+                            <button class="btn btn-success" id="btn-download-validated" disabled>Download Working
+                                File</button>
+                        </div>
+                    </div>
+
+                    <!-- Brand-New Duplicate Summary Section -->
+                    <div id="duplicate-summary-section" style="display: none; margin-top: 24px;">
+                        <h3
+                            style="font-size: 16px; font-weight: 700; color: #ffffff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            📊 Duplicate Summary
+                        </h3>
+                        <div class="summary-cards-grid">
+                            <!-- Card 1: Rows Scanned -->
+                            <div class="summary-metric-card" data-metric="scanned">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: var(--primary);">🔍</span>
+                                    <span class="metric-label">Rows Scanned</span>
+                                </div>
+                                <strong class="metric-value" id="sum-rows-scanned">0</strong>
+                            </div>
+                            <!-- Card 2: Duplicate Groups -->
+                            <div class="summary-metric-card" data-metric="groups">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: var(--warning);">📁</span>
+                                    <span class="metric-label">Duplicate Groups</span>
+                                </div>
+                                <strong class="metric-value" id="sum-dup-groups">0</strong>
+                            </div>
+                            <!-- Card 3: Duplicate Rows -->
+                            <div class="summary-metric-card" data-metric="rows">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: var(--danger);">📄</span>
+                                    <span class="metric-label">Duplicate Rows</span>
+                                </div>
+                                <strong class="metric-value" id="sum-dup-rows">0</strong>
+                            </div>
+                            <!-- Card 4: Phone Duplicates -->
+                            <div class="summary-metric-card" data-metric="phone">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #00b8d9;">📞</span>
+                                    <span class="metric-label">Phone Duplicates</span>
+                                </div>
+                                <strong class="metric-value" id="sum-phone-dups">0</strong>
+                            </div>
+                            <!-- Card 5: Mobile Duplicates -->
+                            <div class="summary-metric-card" data-metric="mobile">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #36b37e;">📱</span>
+                                    <span class="metric-label">Mobile Duplicates</span>
+                                </div>
+                                <strong class="metric-value" id="sum-mobile-dups">0</strong>
+                            </div>
+                            <!-- Card 6: Address Duplicates -->
+                            <div class="summary-metric-card" data-metric="address">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #ffab00;">📍</span>
+                                    <span class="metric-label">Address Duplicates</span>
+                                </div>
+                                <strong class="metric-value" id="sum-address-dups">0</strong>
+                            </div>
+                            <!-- Card 7: Email Duplicates -->
+                            <div class="summary-metric-card" data-metric="email">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #ff5630;">✉️</span>
+                                    <span class="metric-label">Email Duplicates</span>
+                                </div>
+                                <strong class="metric-value" id="sum-email-dups">0</strong>
+                            </div>
+                            <!-- Card 8: Website Duplicates -->
+                            <div class="summary-metric-card" data-metric="website">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #90a4ae;">🌐</span>
+                                    <span class="metric-label">Website Dups</span>
+                                </div>
+                                <strong class="metric-value" id="sum-website-dups">0</strong>
+                            </div>
+                            <!-- Card 9: Business Name Duplicates -->
+                            <div class="summary-metric-card" data-metric="name">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #805ad5;">🏢</span>
+                                    <span class="metric-label">Name Duplicates</span>
+                                </div>
+                                <strong class="metric-value" id="sum-name-dups">0</strong>
+                            </div>
+                            <!-- Card 10: Rows Marked -->
+                            <div class="summary-metric-card" data-metric="marked">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #e53e3e;">✏️</span>
+                                    <span class="metric-label">Rows Marked</span>
+                                </div>
+                                <strong class="metric-value" id="sum-rows-marked">0</strong>
+                            </div>
+                            <!-- Card 11: Rows Removed -->
+                            <div class="summary-metric-card" data-metric="removed">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #ff5630;">🗑️</span>
+                                    <span class="metric-label">Rows Removed</span>
+                                </div>
+                                <strong class="metric-value" id="sum-rows-removed">0</strong>
+                            </div>
+                            <!-- Card 12: Final Rows -->
+                            <div class="summary-metric-card" data-metric="final">
+                                <div class="metric-header">
+                                    <span class="metric-icon" style="color: #36b37e;">🛡️</span>
+                                    <span class="metric-label">Final Rows</span>
+                                </div>
+                                <strong class="metric-value" id="sum-final-rows">0</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Redesigned Duplicate Preview Control Center -->
+                    <div class="card preview-card" id="preview-panel"
+                        style="display:none; padding: 24px; border-radius: 8px; background: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-top: 24px;">
+
+                        <!-- Top Header Area -->
+                        <div class="val-panel-header">
+                            <!-- Left Side: Title & Badge -->
+                            <div class="val-header-left">
+                                <span class="val-title-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00b8d9"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <line x1="9" y1="3" x2="9" y2="21" />
+                                        <line x1="15" y1="3" x2="15" y2="21" />
+                                    </svg>
+                                </span>
+                                <h3 class="val-title-text">Duplicate Preview Table</h3>
+                                <span id="ui-total-rows-badge" class="badge-blue-outline">0 Duplicate Rows Found</span>
+                            </div>
+
+                            <!-- Right Side: Summary Pills & Action Buttons -->
+                            <div class="val-header-right">
+                                <div class="summary-pill">
+                                    <span class="pill-icon">📁</span>
+                                    <span>Total Duplicate Groups: <strong id="ui-total-groups">0</strong></span>
+                                </div>
+                                <div class="summary-pill">
+                                    <span class="pill-icon">🗒️</span>
+                                    <span>Total Duplicate Rows: <strong id="ui-total-rows">0</strong></span>
+                                </div>
+
+                                <button class="btn-refresh-pill" id="btn-val-refresh">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                                    </svg>
+                                    <span>Refresh</span>
+                                </button>
+
+                                <button class="btn-delete-pill" id="btn-val-delete-selected" disabled>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path
+                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <line x1="10" y1="11" x2="10" y2="17" />
+                                        <line x1="14" y1="11" x2="14" y2="17" />
+                                    </svg>
+                                    <span>Delete Selected</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sub-Toolbar (Select All, Search, Columns) -->
+                        <div class="val-sub-toolbar">
+                            <!-- Left: Select All -->
+                            <div class="chk-select-all-container">
+                                <label class="select-all-label">
+                                    <input type="checkbox" id="chk-select-all-duplicates" />
+                                    <span>Select All</span>
+                                </label>
+                            </div>
+
+                            <!-- Right: Search Box & Column Selector -->
+                            <div class="search-columns-container">
+                                <div class="search-box-wrapper">
+                                    <span class="search-magnifier">🔍</span>
+                                    <input type="text" id="val-search-box" class="search-input-field"
+                                        placeholder="Search in table..." />
+                                </div>
+
+                                <div class="col-selector-wrapper">
+                                    <button class="btn-columns-toggle" id="btn-col-selector">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <line x1="4" y1="21" x2="4" y2="14" />
+                                            <line x1="4" y1="10" x2="4" y2="3" />
+                                            <line x1="12" y1="21" x2="12" y2="12" />
+                                            <line x1="12" y1="8" x2="12" y2="3" />
+                                            <line x1="20" y1="21" x2="20" y2="16" />
+                                            <line x1="20" y1="12" x2="20" y2="3" />
+                                            <line x1="1" y1="14" x2="7" y2="14" />
+                                            <line x1="9" y1="8" x2="15" y2="8" />
+                                            <line x1="17" y1="16" x2="23" y2="16" />
+                                        </svg>
+                                        <span>Columns</span>
+                                    </button>
+
+                                    <!-- Columns Dropdown Menu -->
+                                    <div class="col-selector-menu" id="col-selector-menu"
+                                        style="display: none; position: absolute; right: 0; top: 110%; z-index: 1000; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; min-width: 240px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);">
+                                        <div
+                                            style="font-weight: 700; font-size: 11px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                                            Show/Hide & Reorder</div>
+                                        <div id="col-selector-list"
+                                            style="display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;">
+                                            <!-- Managed dynamically by validation.js -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Duplicate Groups Container -->
+                        <div class="duplicate-groups-list" id="duplicate-groups-list">
+                            <!-- Cards will be populated dynamically -->
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Files Tab -->
+            <section class="tab-pane" id="tab-history">
+                <div class="history-controls" style="margin-bottom: 24px;">
+                    <h3 style="display:flex; align-items:center; gap:8px;">📁 Generated Lead Packages</h3>
+                    <p style="color:var(--text-secondary); margin:4px 0 0 0; font-size:12px;">Select download outputs or
+                        delete history blocks instantly. Updated automatically.</p>
+                </div>
+                <div class="history-columns-container"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; align-items: start;">
+
+                    <!-- Column 1: Mining Output -->
+                    <div class="history-col-card"
+                        style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px; min-height: 480px;">
+                        <h4
+                            style="margin:0; font-size: 13px; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:8px; display:flex; align-items:center; gap:6px; color:#ffffff;">
+                            🧭 Mining Output</h4>
+                        <div class="history-column-list" id="col-mining-files"
+                            style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Marked Output -->
+                    <div class="history-col-card"
+                        style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px; min-height: 480px;">
+                        <h4
+                            style="margin:0; font-size: 13px; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:8px; display:flex; align-items:center; gap:6px; color:#ffffff;">
+                            🛡️ Marked Output</h4>
+                        <div class="history-column-list" id="col-marked-files"
+                            style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Delete Duplicate Output -->
+                    <div class="history-col-card"
+                        style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px; min-height: 480px;">
+                        <h4
+                            style="margin:0; font-size: 13px; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:8px; display:flex; align-items:center; gap:6px; color:#ffffff;">
+                            ♻️ Delete Duplicate Output</h4>
+                        <div class="history-column-list" id="col-cleaned-files"
+                            style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Column 4: Fix Tag Output -->
+                    <div class="history-col-card"
+                        style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:12px; min-height: 480px;">
+                        <h4
+                            style="margin:0; font-size: 13px; font-weight:700; border-bottom:1px solid var(--border-color); padding-bottom:8px; display:flex; align-items:center; gap:6px; color:#ffffff;">
+                            🏷️ Fix Tag Output</h4>
+                        <div class="history-column-list" id="col-processed-files"
+                            style="display:flex; flex-direction:column; gap:10px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section class="tab-pane" id="tab-settings">
+                <div class="card settings-card">
+                    <h3> harvester Configurations</h3>
+                    <p>Adjust core limits, delays, and toggle enrichment integrations.</p>
+                    <form id="settings-form" onsubmit="return false;">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="set-workers">Worker Thread Count</label>
+                                <input type="number" id="set-workers" class="form-control" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-retries">Max Retries on Error</label>
+                                <input type="number" id="set-retries" class="form-control" value="3">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-search-delay">Maps Page Load Delay (ms)</label>
+                                <input type="number" id="set-search-delay" class="form-control" value="1500">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-scroll-delay">Maps Scroll Delay (ms)</label>
+                                <input type="number" id="set-scroll-delay" class="form-control" value="1500">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-website-timeout">Website Crawl Timeout (ms)</label>
+                                <input type="number" id="set-website-timeout" class="form-control" value="10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-google-timeout">Google Page Search Timeout (ms)</label>
+                                <input type="number" id="set-google-timeout" class="form-control" value="20000">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-checkpoint">Checkpoint Interval (seconds)</label>
+                                <input type="number" id="set-checkpoint" class="form-control" value="60">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-output-dir">Base Output Directory</label>
+                                <input type="text" id="set-output-dir" class="form-control" value="Output">
+                            </div>
+                        </div>
+
+                        <div class="toggles-grid">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="set-scraping" checked>
+                                <label for="set-scraping">Enrich details by Crawling Websites</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="set-translation" checked>
+                                <label for="set-translation">Translate non-English categories and names</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="set-ai">
+                                <label for="set-ai">Enable AI-fallback Classifications (LLM)</label>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="set-cache" checked>
+                                <label for="set-cache">Cache scraping and class lookups</label>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary" id="btn-save-settings">Save Configurations</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Logs Tab -->
+            <section class="tab-pane" id="tab-logs">
+                <div class="card full-terminal-card">
+                    <div class="panel-header">
+                        <h3>Rolling Engine Log Stream</h3>
+                        <button class="btn btn-xs" id="btn-refresh-logs">Refresh Logs</button>
+                    </div>
+                    <div class="terminal-body large" id="full-system-console">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Mining Completion Modal Popup -->
+    <div class="modal-overlay" id="completion-modal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:2000; align-items:center; justify-content:center;">
+        <div class="modal-card"
+            style="background:#0c1017; border:1px solid #202b36; border-radius:16px; width:90%; max-width:640px; box-shadow:0 24px 48px rgba(0,0,0,0.8); display:flex; flex-direction:column; padding:28px;">
+
+            <!-- Success Icon -->
+            <div style="display:flex; justify-content:center; margin-bottom: 16px;">
+                <div id="pop-icon-circle"
+                    style="width:64px; height:64px; border-radius:50%; background:rgba(16,185,129,0.1); border:2px solid #10b981; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(16,185,129,0.25);">
+                    <span id="pop-icon-symbol" style="font-size:28px; color:#10b981;">✓</span>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h2 id="pop-title"
+                style="font-size:24px; font-weight:700; text-align:center; color:#ffffff; margin:0 0 8px 0; letter-spacing:-0.5px;">
+                Mining Completed Successfully!</h2>
+            <p id="pop-desc" style="font-size:13px; color:#919eab; text-align:center; margin:0 0 24px 0;">Lead
+                harvesting and website enrichment pipeline has completed.</p>
+
+            <!-- 3 Column Stats Grid -->
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:20px;">
+                <!-- Column 1: Pipeline Overview -->
+                <div
+                    style="background:rgba(255,255,255,0.01); border:1px solid #212b36; border-radius:8px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <h4
+                        style="margin:0 0 12px 0; font-size:11px; text-transform:uppercase; color:#919eab; letter-spacing:0.5px; font-weight:700;">
+                        Pipeline Overview</h4>
+                    <div
+                        style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--text-secondary);">
+                        <div style="display:flex; justify-content:space-between;"><span>Found:</span><strong
+                                id="pop-found" style="color:#00b8d9;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Saved:</span><strong
+                                id="pop-saved" style="color:#36b37e;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Duplicates:</span><strong
+                                id="pop-skipped" style="color:#ffab00;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Failed:</span><strong
+                                id="pop-failed" style="color:#ff5630;">0</strong></div>
+                    </div>
+                </div>
+
+                <!-- Column 2: Data Channels -->
+                <div
+                    style="background:rgba(255,255,255,0.01); border:1px solid #212b36; border-radius:8px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <h4
+                        style="margin:0 0 12px 0; font-size:11px; text-transform:uppercase; color:#919eab; letter-spacing:0.5px; font-weight:700;">
+                        Data Channels</h4>
+                    <div
+                        style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--text-secondary);">
+                        <div style="display:flex; justify-content:space-between;"><span>Emails:</span><strong
+                                id="pop-emails" style="color:#36b37e;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Phones:</span><strong
+                                id="pop-phones" style="color:#00b8d9;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Websites:</span><strong
+                                id="pop-websites" style="color:#a855f7;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Time:</span><strong
+                                id="pop-duration" style="color:#ffffff;">00:00:00</strong></div>
+                    </div>
+                </div>
+
+                <!-- Column 3: Social Media -->
+                <div
+                    style="background:rgba(255,255,255,0.01); border:1px solid #212b36; border-radius:8px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;">
+                    <h4
+                        style="margin:0 0 12px 0; font-size:11px; text-transform:uppercase; color:#919eab; letter-spacing:0.5px; font-weight:700;">
+                        Social Media</h4>
+                    <div
+                        style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:var(--text-secondary);">
+                        <div style="display:flex; justify-content:space-between;"><span>Instagram:</span><strong
+                                id="pop-instagram" style="color:#ffffff;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Facebook:</span><strong
+                                id="pop-facebook" style="color:#ffffff;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>LinkedIn:</span><strong
+                                id="pop-linkedin" style="color:#ffffff;">0</strong></div>
+                        <div style="display:flex; justify-content:space-between;"><span>Twitter/YT:</span><strong
+                                id="pop-twitter-yt" style="color:#ffffff;">0</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality & Cleanliness Row -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:24px;">
+                <!-- Enrichment Quality Score -->
+                <div
+                    style="background:rgba(255,255,255,0.01); border:1px solid rgba(16,185,129,0.15); border-radius:8px; padding:14px; text-align:center;">
+                    <span
+                        style="font-size:11px; color:#10b981; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px; letter-spacing:0.5px;">Enrichment
+                        Quality Score</span>
+                    <div
+                        style="color:#ffab00; font-size:16px; margin-bottom:4px; display:flex; justify-content:center; gap:2px;">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <span id="pop-quality-percentage"
+                        style="font-size:11px; color:#ffffff; font-weight:600;">Completeness: 100%</span>
+                </div>
+
+                <!-- Data Cleanliness -->
+                <div
+                    style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,86,48,0.15); border-radius:8px; padding:14px; text-align:center;">
+                    <span
+                        style="font-size:11px; color:#ff5630; text-transform:uppercase; font-weight:700; display:block; margin-bottom:6px; letter-spacing:0.5px;">Data
+                        Cleanliness</span>
+                    <div id="pop-cleanliness-errors"
+                        style="color:#ff5630; font-size:15px; font-weight:700; margin-bottom:4px;">0 Errors</div>
+                    <span id="pop-cleanliness-missing" style="font-size:11px; color:#919eab;">Missing: E: 0 | W:
+                        0</span>
+                </div>
+            </div>
+
+            <!-- Generated File banner -->
+            <div
+                style="background:#111622; border:1px solid #202b36; border-radius:8px; padding:12px 18px; display:flex; align-items:center; gap:14px; margin-bottom:24px;">
+                <div style="font-size:24px; color:#36b37e; display:flex; align-items:center;">
+                    <span id="pop-file-icon">🟢</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
+                    <span id="pop-file-type-label"
+                        style="font-size:10px; color:#919eab; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Generated
+                        File (Excel Spreadsheet):</span>
+                    <strong id="pop-file-name-value"
+                        style="font-size:13px; color:#ffffff; word-break:break-all;">Loading output file...</strong>
+                </div>
+            </div>
+
+            <!-- Modal Footer Buttons -->
+            <div style="display:flex; justify-content:center; gap:12px;">
+                <button class="btn btn-primary" id="btn-download-output"
+                    style="background:#ffffff; color:#0c1017; border:none; padding:12px 28px; border-radius:6px; font-weight:700; font-size:13px; display:flex; align-items:center; gap:8px; cursor:pointer; transition: opacity 0.2s;">
+                    <span>☁️</span> <span id="pop-btn-download-text">Download Excel File</span>
+                </button>
+                <button class="btn btn-secondary" id="btn-close-completion"
+                    style="background:rgba(255,255,255,0.05); color:#ffffff; border:1px solid #202b36; padding:12px 28px; border-radius:6px; font-weight:700; font-size:13px; cursor:pointer; transition: background 0.2s;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts bootstrap -->
+    <script src="/js/app.js?v=7"></script>
+    <script src="/js/mining.js?v=7"></script>
+    <script src="/js/validation.js?v=7"></script>
+    <script src="/js/settings.js?v=7"></script>
+</body>
+
+</html>
