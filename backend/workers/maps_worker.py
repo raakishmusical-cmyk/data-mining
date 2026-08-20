@@ -118,28 +118,62 @@ class MapsWorker:
                         stage_callback("Opening Business", name)
                         
                     # Click to show panel details
-                    await item.click()
-                    
-                    # Poll details pane header to load the name to avoid static delays
-                    import time
-                    start_wait = time.time()
                     panel_loaded = False
                     details_name = "N/A"
-                    while time.time() - start_wait < 5.0:
+
+                    for attempt in range(2):
                         try:
-                            title_loc = page.locator('h1.DUwDvf')
-                            if await title_loc.count() > 0:
-                                title_text = await title_loc.first.text_content() or ""
-                                details_name = clean_text(title_text)
-                                if normalize_string(details_name) == normalize_string(name):
-                                    panel_loaded = True
-                                    break
-                        except Exception:
-                            pass
-                        await asyncio.sleep(0.1)
-                    
+                            # Re-acquire the locator because Google Maps can refresh the results DOM
+                            item = page.locator("a.hfpxzc").nth(i)
+
+                            await item.scroll_into_view_if_needed()
+                            await item.click()
+
+                            # Poll details pane header instead of relying on a fixed sleep.
+                            # Render can be slower than local Windows execution.
+                            import time
+                            start_wait = time.time()
+
+                            while time.time() - start_wait < 10.0:
+                                try:
+                                    title_loc = page.locator("h1.DUwDvf")
+
+                                    if await title_loc.count() > 0:
+                                        title_text = await title_loc.first.text_content() or ""
+                                        details_name = clean_text(title_text)
+
+                                        if normalize_string(details_name) == normalize_string(name):
+                                            panel_loaded = True
+                                            break
+
+                                except Exception:
+                                    pass
+
+                                await asyncio.sleep(0.2)
+
+                            if panel_loaded:
+                                break
+
+                            logger.warning(
+                                f"Panel attempt {attempt + 1}/2 did not match "
+                                f"'{name}'. Current panel title: '{details_name}'."
+                            )
+
+                            # Give Google Maps a short moment before retrying.
+                            await asyncio.sleep(0.5)
+
+                        except Exception as e:
+                            logger.warning(
+                                f"Panel click attempt {attempt + 1}/2 failed for "
+                                f"'{name}': {e}"
+                            )
+
                     if not panel_loaded:
-                        logger.warning(f"Timeout waiting for details panel to match '{name}'. Current panel title: '{details_name}'. Skipping extraction to avoid stale data.")
+                        logger.warning(
+                            f"Timeout waiting for details panel to match '{name}'. "
+                            f"Current panel title: '{details_name}'. "
+                            f"Skipping extraction to avoid stale data."
+                        )
                         continue
                     
                     await asyncio.sleep(0.2) # Short settle delay
